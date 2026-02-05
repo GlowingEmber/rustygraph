@@ -2,6 +2,7 @@ use reqwest::Client;
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::io;
+use std::io::Write;
 
 #[derive(Deserialize, Debug)]
 struct PageResponse {
@@ -23,8 +24,6 @@ struct PageLinksResponse {
 #[derive(Deserialize, Debug)]
 struct Continued {
     plcontinue: String,
-    #[serde(rename = "continue")]
-    continued: String,
 }
 
 #[derive(Deserialize, Debug)]
@@ -34,7 +33,6 @@ struct Query {
 
 #[derive(Deserialize, Debug)]
 struct Page {
-    title: String,
     links: Option<Vec<Link>>,
 }
 
@@ -95,6 +93,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
 
     let to_string = to_json.parse.title;
+
+    print!("Finding a path from {} to {}...", from_string, to_string);
+    io::stdout().flush().unwrap();
 
     let mut visited: HashMap<String, String> = HashMap::new();
     visited.insert(from_string.clone(), "".to_string());
