@@ -8,3 +8,4 @@ reqwest = { version = "0.11", features = ["json"] }
 tokio = { version = "1", features = ["full"] }
 serde = { version = "1.0", features = ["derive"] }
 petgraph = "0.8.3"
+petgraph-evcxr = "0.2.0"

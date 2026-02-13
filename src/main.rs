@@ -1,6 +1,9 @@
+use petgraph::Graph;
+use petgraph::dot::{Config, Dot};
 use reqwest::Client;
 use serde::Deserialize;
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
+use std::fs;
 use std::io;
 use std::io::Write;
 
@@ -99,8 +102,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut visited: HashMap<String, String> = HashMap::new();
     visited.insert(from_string.clone(), "".to_string());
-    let mut frontier: Vec<String> = Vec::new();
-    frontier.push(from_string.clone());
+    let mut frontier: VecDeque<String> = VecDeque::new();
+    frontier.push_back(from_string.clone());
 
     fn path_list(mut child: String, visited: &HashMap<String, String>) -> Vec<String> {
         let mut path: Vec<String> = Vec::new();
@@ -115,7 +118,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     'outer: while frontier.len() > 0 {
-        let page_string = frontier.pop().expect("Frontier was empty");
+        let page_string = frontier.pop_front().expect("Frontier was empty");
         let mut url = format!(
             "https://en.wikipedia.org/w/api.php?action=query&titles={}&prop=links&pllimit=max&plnamespace=0&format=json",
             page_string
@@ -134,12 +137,23 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         // println!("{}", link.title.clone());
                         if link.title.clone() == to_string {
                             visited.insert(link.title.clone(), page_string.to_string());
-                            println!("{:?}", path_list(link.title.clone(), &visited));
+                            // let final_path: Vec<String> = path_list(link.title.clone(), &visited);
+                            // let mut g: Graph<&str, &str> = Graph::new();
+                            // for (i, e) in final_path[..final_path.len()].iter().enumerate() {
+                            //     let a = g.add_node("{}", );
+                            //     let b = g.add_node("{}");
+                            //     g.add_edge("A", "B", "edge from a → b");
+                            // }
+                            // g.add_edge(a, b, "edge from a → b");
+                            // let output =
+                            //     format!("{:?}", Dot::with_config(&g, &[Config::EdgeNoLabel]));
+                            // fs::write("graph.dot", output)?; 
+
                             break 'outer;
                         }
                         if !visited.contains_key(&link.title) {
                             visited.insert(link.title.clone(), page_string.to_string());
-                            frontier.push(link.title.clone());
+                            frontier.push_back(link.title.clone());
                         }
                     }
                 }
